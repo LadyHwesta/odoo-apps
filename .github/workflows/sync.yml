@@ -1,0 +1,54 @@
+# Keeps this repo in step with LadyHwesta/odoo-addons, so it never goes stale:
+# every day (and on demand) it copies the modules listed for the Odoo Apps
+# Store from odoo-addons' main branch, checks them against the store's rules,
+# and commits any change. A failed check stops the sync before anything is
+# committed, so the store never sees a broken module; GitHub emails the
+# repo owner about the failed run.
+#
+# To add or remove a store module: change LISTINGS in odoo-addons'
+# tools/store_listing.py. Nothing here needs editing.
+name: Sync from odoo-addons
+
+on:
+  schedule:
+    - cron: '17 11 * * *'   # daily, 03:17 Pacific
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: LadyHwesta/odoo-addons
+          ref: main
+          path: _source
+      - name: Copy the store modules
+        run: |
+          modules="$(python3 _source/tools/store_listing.py --list)"
+          for m in $modules; do rm -rf "$m"; cp -r "_source/$m" "$m"; done
+          # Modules taken off the store list are removed here too.
+          for d in */; do
+            d="${d%/}"
+            [ "$d" = "_source" ] && continue
+            case " $modules " in *" $d "*) ;; *) rm -rf "$d" ;; esac
+          done
+      - name: Check the store rules
+        run: python3 _source/tools/store_listing.py --check .
+      - name: Commit any change
+        run: |
+          source_sha="$(git -C _source rev-parse --short HEAD)"
+          rm -rf _source
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Already up to date."
+          else
+            git commit -m "Sync store modules from odoo-addons ${source_sha}"
+            git push
+          fi

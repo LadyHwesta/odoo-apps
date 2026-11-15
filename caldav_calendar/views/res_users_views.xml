@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Self-service "Preferences" popup: any user can see + manage their own
+         CalDAV accounts here. "other_preferences" is the placeholder group
+         base/views/res_users_views.xml explicitly reserves for this kind of
+         override (see the "mail" module's notification settings for the
+         same pattern). Inserted as a sibling *after* it, as its own nested
+         <group>, rather than injected *inside* it: a bare heading span or
+         button div as a direct child of a <group> counts as a single
+         unpaired grid cell and throws off the label/field pairing of every
+         field that follows it. A nested <group string="..."> gets a bold
+         header for free and keeps its own clean pairing, without disturbing
+         the outer grid at all. -->
+    <record id="view_users_form_simple_modif_caldav" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.caldav</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='other_preferences']" position="after">
+                <group string="CalDAV Calendar Sync" name="caldav_calendar_sync">
+                    <field name="caldav_account_ids" nolabel="1" colspan="2" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="sync_status" widget="badge"
+                                   decoration-success="sync_status == 'active'"
+                                   decoration-warning="sync_status == 'paused'"
+                                   decoration-danger="sync_status == 'error'"/>
+                            <field name="read_only" optional="show"/>
+                            <field name="url"/>
+                            <field name="last_sync"/>
+                        </list>
+                    </field>
+                    <div class="o_row" name="caldav_accounts_button" colspan="2">
+                        <button type="action" name="%(caldav_calendar.action_caldav_account)d"
+                                string="Manage CalDAV Calendars" class="btn-secondary"
+                                context="{'default_user_id': id}"/>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

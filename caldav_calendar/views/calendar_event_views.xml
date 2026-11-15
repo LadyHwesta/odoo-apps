@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Which of the organizer's (possibly several) CalDAV calendars this
+         event belongs to - a real, user-facing choice once someone has more
+         than one account, so it's a normal field, not tucked behind debug
+         mode. Left blank, the event just isn't synced. -->
+    <record id="view_calendar_event_form_caldav" model="ir.ui.view">
+        <field name="name">calendar.event.form.caldav</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group>
+                    <field name="caldav_account_id" string="Sync to CalDAV Calendar"
+                           domain="[('user_id', '=', user_id), ('read_only', '=', False)]"
+                           placeholder="Not synced"/>
+                </group>
+                <group string="CalDAV Sync (Technical)" name="caldav_technical" groups="base.group_no_one">
+                    <field name="caldav_uid" readonly="1"/>
+                    <field name="caldav_href" readonly="1"/>
+                    <field name="caldav_etag" readonly="1"/>
+                    <field name="need_caldav_sync" readonly="1"/>
+                    <field name="caldav_recurrence_id_date" readonly="1"/>
+                    <field name="follow_recurrence" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
