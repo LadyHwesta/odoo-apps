@@ -7,7 +7,7 @@
 #
 # To add or remove a store module: change LISTINGS in odoo-addons'
 # tools/store_listing.py. Nothing here needs editing.
-name: Sync from odoo-addons
+name: Sync from odoo-addons  # store modules, daily
 
 on:
   schedule:
